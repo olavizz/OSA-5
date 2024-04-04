@@ -17,17 +17,16 @@ const BlogForm = ({ createBlog }) => {
     setAuthor('')
     setUrl('')
   }
-    return (
-        <div>
-        <h2>create new</h2>
+  return (
+    <div>
+      <h2>create new</h2>
       <div>
         title:<input type="text" value={title} onChange={event => setTitle(event.target.value)}  /><br />
         author:<input type="text" value={author} onChange={event => setAuthor(event.target.value)}/><br />
         url:<input type="text" value={url} onChange={event => setUrl(event.target.value)}/><br />
         <button onClick={addBlog}>create</button>
       </div>
-      </div>
-    )
+    </div>
+  )
 }
-
 export default BlogForm
