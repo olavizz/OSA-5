@@ -1,16 +1,15 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import Blog from './components/Blog'
 import blogService from './services/blogs'
 import loginService from './services/login'
+import Togglable from './components/Togglable'
+import BlogForm from './components/BlogForm'
 
 const App = () => {
   const [blogs, setBlogs] = useState([])
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [user, setUser] = useState(null)
-  const [title, setTitle] = useState('')
-  const [author, setAuthor] = useState('')
-  const [url, setUrl] = useState('')
   const [errorMessage, setErrorMessage] = useState(null)
 
   useEffect(() => {
@@ -57,17 +56,11 @@ const App = () => {
     window.location.reload()
   }
 
-  const handleNewBlog = async (event) => {
-    event.preventDefault()
-
+  const handleNewBlog = async (blogObject) => {
     try {
-    const blog = {
-      title: title,
-      author: author,
-      url: url
-    }
-    console.log(blog)
-    const updatedBlog = await blogService.create(blog)
+    blogFormRef.current.toggleVisibility()
+      console.log(blogObject)
+    const updatedBlog = await blogService.create(blogObject)
     console.log(updatedBlog)
     const newBlogs = blogs.concat(updatedBlog)
     setBlogs(newBlogs)
@@ -81,6 +74,20 @@ const App = () => {
       console.log(error.message)
     }
   }
+
+  const blogFormRef = useRef()
+
+  const updateObject = async (updatedObj) => {
+    try {
+      console.log('tähän asti ok', updatedObj)
+      const updatedLikes = await blogService.update(updatedObj)
+      console.log(updatedLikes)
+      const blogs = await blogService.getAll()
+      setBlogs(blogs)
+    } catch (error) { 
+      console.log(error)
+    }
+  } 
 
   const Notification = ({ message }) => {
     if (message === null) {
@@ -130,17 +137,15 @@ const App = () => {
       <Notification message={errorMessage} />
       <div>
         {user.name} logged in <button onClick={handleLogout}>logout</button>
-      </div>
-      <h2>create new</h2>
-      <div>
-        title:<input type="text" value={title} onChange={({ target }) => setTitle(target.value)} /><br />
-        author:<input type="text" value={author} onChange={({ target }) => setAuthor(target.value)} /><br />
-        url:<input type="text" value={url} onChange={({ target }) => setUrl(target.value)} /><br />
-        <button onClick={handleNewBlog}>create</button>
-      </div>
-
+      </div> <br />
+      <Togglable buttonLabel='new blog' ref={blogFormRef}>
+      <BlogForm createBlog={handleNewBlog}
+      />
+      </Togglable>
+      <div/>
+      <br />
       {blogs.map(blog =>
-        <Blog key={blog.id} blog={blog} />
+        <Blog key={blog.id} blog={blog} updatedBlog={updateObject} />
       )}
     </div>
   )
